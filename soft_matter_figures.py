@@ -1,6 +1,35 @@
-'''
-Code to plot the figures used in the manuscript
-'''
+"""
+Genomic regulation of chemo-mechanical stability in plant-derived
+extracellular vesicles (PDEVs): a multiscale model of composite reinforcement.
+
+soft_matter_figures.py
+======================
+
+Produces the four publication-ready figures of the manuscript from the CSV
+outputs of the SCG-MD simulation scripts:
+    
+    Fig2_Stress_Strain.pdf      -> Fig. 2 (Comparative stress-strain trajectories)
+    Fig3_Mechanics_Control.pdf  -> Fig. 3 (Mechanical hierarchy of PDEV states)
+    Fig4_Topology_Scatter.pdf   -> Fig. 4 (Topological reinforcement; S_max)
+    Fig5_pH_Stability.pdf       -> Fig. 5 (Environmental stability under acid shock)
+    
+
+Inputs
+------
+    kev_mechanics.csv               (from kev_mechanics.py; used for Fig. 5)
+    kev_seeded_vs_spontaneous.csv   (from kev_seeded_vs_spontaneous.py;
+                                     used for Figs. 2, 3, 4)
+
+Notation
+--------
+Display labels follow the manuscript ("Defence" / "Randomised").
+Axis labels use the manuscript symbols gamma_crit (critical rupture tension),
+S_max (rigid-domain percolation fraction) and units mN m^-1. The underlying CSV
+column names are kept as-is (Rupture_Tension_mNm, Percolation, Heterogeneity,
+Mission, Mode) for backwards-compatibility; only the rendered strings change.
+
+Requires matplotlib and seaborn.
+"""
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -56,7 +85,11 @@ def generate_all_figures():
     c_acid = '#8e44ad' # Purple (Acid)
 
     # =========================================================================
-    # FIG 1: Mechanics Control (Violin/Box Plot)
+    # FIG 3: Mechanics Control (Violin/Strip Plot) -- manuscript Fig. 3
+    # Critical rupture tension (gamma_crit) for the three conditions compared
+    # in "Mechanical hierarchy of states": Ripening (State A, Seeded),
+    # Defence (State B) Seeded (Composite), and Defence (State B) Spontaneous
+    # (Randomised control). N=50 per group.
     # =========================================================================
     fig1, ax1 = plt.subplots(figsize=(6, 5))
     
@@ -67,13 +100,13 @@ def generate_all_figures():
         ((df_seededvsspontaneous['Mission'] == 'STATE_B_DEFENSE') & (df_seededvsspontaneous['Mode'] == 'SPONTANEOUS'))
     ].copy()
 
-    # Label mapping
+    # Label mapping (display strings use manuscript spelling: Defence / Randomised)
     subset['Condition'] = subset.apply(lambda x: 
         'Ripening\n(Fluid)' if x['Mission'] == 'STATE_A_RIPENING' else 
-        ('Defence\n(Composite)' if x['Mode'] == 'SEEDED' else 'Defence\n(Randomized)'), axis=1)
+        ('Defence\n(Composite)' if x['Mode'] == 'SEEDED' else 'Defence\n(Randomised)'), axis=1)
 
-    order = ['Ripening\n(Fluid)', 'Defence\n(Randomized)', 'Defence\n(Composite)']
-    pal = [c_rip, c_rnd, c_def]
+    order = ['Ripening\n(Fluid)', 'Defence\n(Randomised)', 'Defence\n(Composite)']
+    pal = [c_rip, c_def, c_rnd]
 
     sns.violinplot(data=subset, x='Condition', y='Rupture_Tension_mNm', order=order, palette=pal, hue='Condition',
                    inner=None, alpha=0.3, linewidth=0, ax=ax1)
@@ -93,54 +126,16 @@ def generate_all_figures():
     x1, x2 = 1, 2
     y, h = y_max - 50, 5
     ax1.plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c='k')
-    ax1.text((x1+x2)/2, y+h+2, "Topology Effect\n(+23%)", ha='center', va='bottom', fontsize=9, fontweight='bold')
+    ax1.text((x1+x2)/2, y+h+2, "Topology Effect\n(+22%)", ha='center', va='bottom', fontsize=9, fontweight='bold')
 
-    ax1.set_ylabel('Critical Yield Tension (mN/m)', fontweight='bold')
+    ax1.set_ylabel('Critical Rupture Tension, $\\gamma_{crit}$ (mN m$^{-1}$)', fontweight='bold')
     ax1.set_xlabel('')
-    ax1.set_ylim(200, 420)
+    ax1.set_ylim(200, 400)
     sns.despine(trim=True)
     plt.tight_layout()
-    plt.savefig('Fig1_Mechanics_Control.pdf',dpi=300)
-    print("Generated Fig1")
+    plt.savefig('Fig3_Mechanics_Control.pdf',dpi=300)
+    print("Generated Fig3")
 
-    # =========================================================================
-    # FIG 2: Topology (Scatter)
-    # =========================================================================
-    # Use control data for scatter to show the seeded vs spontaneous contrast
-    
-    # g = sns.JointGrid(data=df_seededvsspontaneous, x='Percolation', y='Rupture_Tension_mNm', hue='Mission',
-    #                   palette={'STATE_A_RIPENING': c_rip, 'STATE_B_DEFENSE': c_def}, height=6)
-    
-    # # Plot seeded data
-    # seeded = df_seededvsspontaneous[df_seededvsspontaneous['Mode'] == 'SEEDED']
-    # sns.scatterplot(data=seeded, x='Percolation', y='Rupture_Tension_mNm', hue='Mission', 
-    #                 palette={'STATE_A_RIPENING': c_rip, 'STATE_B_DEFENSE': c_def}, 
-    #                 s=80, alpha=0.6, edgecolor='k', ax=g.ax_joint, legend=False)
-
-    # # Plot spontaneous data (as Xs or different marker)
-    # spont = df_seededvsspontaneous[df_seededvsspontaneous['Mode'] == 'SPONTANEOUS']
-    # # We plot spontaneous defense in grey/red mix or just distinguish by marker
-    # g.ax_joint.scatter(spont['Percolation'], spont['Rupture_Tension_mNm'], 
-    #                    color=c_rnd, marker='X', s=80, label='Randomized Control', alpha=0.6, edgecolor='k')
-
-    # g.plot_marginals(sns.kdeplot, fill=True, alpha=0.3)
-
-    # g.ax_joint.axvline(x=0.5, color='k', linestyle='--', alpha=0.5)
-    # g.ax_joint.text(0.52, 240, 'Monolithic\nLimit', color='k', fontsize=9)
-    # g.ax_joint.text(0.48, 240, 'Composite\nRange', color='k', ha='right', fontsize=9)
-    
-    # g.set_axis_labels('Rigid Domain Percolation ($S_{max}$)', 'Rupture Tension (mN/m)', fontweight='bold')
-    
-    # # Manual legend
-    # from matplotlib.lines import Line2D
-    # legend_elements = [
-    #     Line2D([0], [0], marker='o', color='w', markerfacecolor=c_rip, label='Ripening (Fluid)', markersize=10),
-    #     Line2D([0], [0], marker='o', color='w', markerfacecolor=c_def, label='Defence (Composite)', markersize=10),
-    #     Line2D([0], [0], marker='X', color='w', markerfacecolor=c_rnd, label='Defence (Randomized)', markersize=10)
-    # ]
-    # g.ax_joint.legend(handles=legend_elements, loc='upper left')
-
-    # plt.tight_layout()
 
     # ----------------------------
     # Create 3-level grouping variable
@@ -159,37 +154,37 @@ def generate_all_figures():
         'Case'
     ] = 'Ripening (Seeded)'
 
-    # Defense (seeded)
+    # Defence (seeded)
     df.loc[
         (df['Mission'] == 'STATE_B_DEFENSE') &
         (df['Mode'] == 'SEEDED'),
         'Case'
-    ] = 'Defense (Seeded)'
+    ] = 'Defence (Seeded)'
 
-    # Defense (spontaneous) – cluster 1
+    # Defence (spontaneous) – cluster 1
     df.loc[
         (df['Mission'] == 'STATE_B_DEFENSE') &
         (df['Mode'] == 'SPONTANEOUS') &
         (df['Percolation'] < SPONT_THRESHOLD),
         'Case'
-    ] = 'Defense (Randomized) – Cluster 1'
+    ] = 'Defence (Randomised) – Cluster 1'
 
-    # Defense (spontaneous) – cluster 2
+    # Defence (spontaneous) – cluster 2
     df.loc[
         (df['Mission'] == 'STATE_B_DEFENSE') &
         (df['Mode'] == 'SPONTANEOUS') &
         (df['Percolation'] >= SPONT_THRESHOLD),
         'Case'
-    ] = 'Defense (Randomized) – Cluster 2'
+    ] = 'Defence (Randomised) – Cluster 2'
 
     # --------------------------------------------------
     # 2. COLOR PALETTE
     # --------------------------------------------------
     palette_case = {
         'Ripening (Seeded)': c_rip,
-        'Defense (Seeded)': c_def,
-        'Defense (Randomized) – Cluster 1': c_rnd,
-        'Defense (Randomized) – Cluster 2': c_rnd
+        'Defence (Seeded)': c_def,
+        'Defence (Randomised) – Cluster 1': c_rnd,
+        'Defence (Randomised) – Cluster 2': c_rnd
     }
 
     # --------------------------------------------------
@@ -285,7 +280,7 @@ def generate_all_figures():
     # --------------------------------------------------
     g.set_axis_labels(
         'Rigid Domain Percolation ($S_{max}$)',
-        'Rupture Tension (mN/m)',
+        'Critical Rupture Tension, $\\gamma_{crit}$ (mN m$^{-1}$)',
         fontweight='bold'
     )
 
@@ -302,11 +297,11 @@ def generate_all_figures():
 
         Line2D([0], [0], marker='o', color='w',
             markerfacecolor=c_def, markersize=10,
-            label='Defense (Seeded)'),
+            label='Defence (Seeded)'),
 
         Line2D([0], [0], marker='X', color='w',
             markerfacecolor=c_rnd, markersize=10,
-            label='Defense (Randomized)')
+            label='Defence (Randomised)')
     ]
 
     g.ax_joint.legend(
@@ -317,11 +312,14 @@ def generate_all_figures():
 
 
 
-    plt.savefig('Fig2_Topology_Scatter.pdf',dpi=300)
-    print("Generated Fig2")
+    plt.savefig('Fig4_Topology_Scatter.pdf',dpi=300)
+    print("Generated Fig4")
 
     # =========================================================================
-    # FIG 3: pH Stability (Bar)
+    # FIG 5: pH Stability (Bar) -- manuscript Fig. 5
+    # Environmental stability under acid shock (pH 6.8 vs 2.5). The Ripening
+    # state (A) stress-stiffens (jamming) under acid shock; the Defence state
+    # (B) exhibits mechanical homeostasis (Delta < 2.5%).
     # =========================================================================
     fig3, ax3 = plt.subplots(figsize=(6, 5))
     subset_ph = df_mechanics[df_mechanics['pH'].isin([2.5, 6.8])]
@@ -342,20 +340,23 @@ def generate_all_figures():
                  arrowprops=dict(facecolor='black', arrowstyle='->'), ha='center')
 
     h_b_25 = means[(means['Mission']=='STATE_B_DEFENSE') & (means['pH']==2.5)]['Rupture_Tension_mNm'].values[0]
-    ax3.text(0.8, h_b_25+15, "Homeostasis\n($\Delta < 2.5\%$)", ha='center', color=c_def, fontweight='bold')
+    ax3.text(0.8, h_b_25+15, r"Homeostasis\n($\Delta = 1.3\%$)", ha='center', color=c_def, fontweight='bold')
 
-    ax3.set_ylabel('Rupture Tension (mN/m)', fontweight='bold')
+    ax3.set_ylabel('Critical Rupture Tension, $\\gamma_{crit}$ (mN m$^{-1}$)', fontweight='bold')
     ax3.set_xlabel('')
     ax3.set_xticklabels(['Ripening (A)', 'Defence (B)'])
     ax3.legend(title='pH', loc='upper left')
-    ax3.set_ylim(0, 450)
+    ax3.set_ylim(0, 500)
     sns.despine()
     plt.tight_layout()
-    plt.savefig('Fig3_pH_Stability.pdf',dpi=300)
-    print("Generated Fig3")
+    plt.savefig('Fig5_pH_Stability.pdf',dpi=300)
+    print("Generated Fig5")
 
     # =========================================================================
-    # FIG 4: Stress-Strain (Curves)
+    # FIG 2: Stress-Strain (Curves) -- manuscript Fig. 2
+    # Comparative stress-strain trajectories. State B (Defence, Composite /
+    # Seeded) exhibits a higher yield point and greater toughness (area under
+    # the curve) than the fluid Ripening state (A) and the randomised control.
     # =========================================================================
     fig4, ax4 = plt.subplots(figsize=(7, 5))
     
@@ -396,21 +397,21 @@ def generate_all_figures():
         ax4.scatter(common_s[-1]*100, mean_t[-1], color=color, s=40, zorder=5)
 
     plot_curve_group('STATE_A_RIPENING', 'SEEDED', c_rip, 'Ripening (Fluid)')
-    plot_curve_group('STATE_B_DEFENSE', 'SPONTANEOUS', c_rnd, 'Defence (Randomized)', '--')
+    plot_curve_group('STATE_B_DEFENSE', 'SPONTANEOUS', c_rnd, 'Defence (Randomised)', '--')
     plot_curve_group('STATE_B_DEFENSE', 'SEEDED', c_def, 'Defence (Composite)')
 
     ax4.set_xlabel('Areal Strain (%)', fontweight='bold')
-    ax4.set_ylabel('Membrane Tension (mN/m)', fontweight='bold')
+    ax4.set_ylabel('Membrane Tension, $\\gamma$ (mN m$^{-1}$)', fontweight='bold')
     ax4.legend(loc='lower right', frameon=True)
     
     # Annotate Toughness
-    ax4.annotate("Toughness $\sim \int \gamma d\epsilon$", xy=(15, 100), xytext=(5, 300),
+    ax4.annotate(r"Toughness $\sim \int \gamma d\epsilon$", xy=(15, 100), xytext=(5, 300),
                  arrowprops=dict(facecolor='black', arrowstyle='->'), ha='center', fontsize=10)
     
     sns.despine()
     plt.tight_layout()
-    plt.savefig('Fig4_Stress_Strain.pdf',dpi=300)
-    print("Generated Fig4")
+    plt.savefig('Fig2_Stress_Strain.pdf',dpi=300)
+    print("Generated Fig2")
 
 if __name__ == "__main__":
     generate_all_figures()

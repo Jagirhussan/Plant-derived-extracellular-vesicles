@@ -1,0 +1,19 @@
+Radius_nm,Coordination_z,State_Description,Target_K_mNm,Assigned_k_bond_mNm,Empirical_K_mesh_mNm,Geometric_Prefactor_c,Ratio_Kmesh_to_Target
+20.0,7.98,Ripening Matrix (legacy Eq.1),120.0,60.0,92.69,1.545,0.772
+20.0,7.98,POPC Baseline (legacy Eq.1),240.0,120.0,185.39,1.545,0.772
+20.0,7.98,Defence Raft (legacy Eq.1),690.0,345.0,532.98,1.545,0.772
+20.0,7.98,Ripening (State A) composite K_Lo,300.0,150.0,231.73,1.545,0.772
+20.0,7.98,Ripening (State A) composite K_Ld,60.0,30.0,46.35,1.545,0.772
+20.0,7.98,Ripening (State A) composite K_int,100.0,50.0,77.24,1.545,0.772
+20.0,7.98,Defence (State B) composite K_Lo,720.0,360.0,556.16,1.545,0.772
+20.0,7.98,Defence (State B) composite K_Ld,210.0,105.0,162.21,1.545,0.772
+20.0,7.98,Defence (State B) composite K_int,325.16129032258067,162.58064516129033,251.17,1.545,0.772
+40.0,7.99,Ripening Matrix (legacy Eq.1),120.0,60.0,90.35,1.506,0.753
+40.0,7.99,POPC Baseline (legacy Eq.1),240.0,120.0,180.7,1.506,0.753
+40.0,7.99,Defence Raft (legacy Eq.1),690.0,345.0,519.51,1.506,0.753
+40.0,7.99,Ripening (State A) composite K_Lo,300.0,150.0,225.88,1.506,0.753
+40.0,7.99,Ripening (State A) composite K_Ld,60.0,30.0,45.18,1.506,0.753
+40.0,7.99,Ripening (State A) composite K_int,100.0,50.0,75.29,1.506,0.753
+40.0,7.99,Defence (State B) composite K_Lo,720.0,360.0,542.1,1.506,0.753
+40.0,7.99,Defence (State B) composite K_Ld,210.0,105.0,158.11,1.506,0.753
+40.0,7.99,Defence (State B) composite K_int,325.16129032258067,162.58064516129033,244.82,1.506,0.753
